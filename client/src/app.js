@@ -191,9 +191,10 @@ export default function main({ DOM, HTTP, route, storage, scanner: scan$, search
   // Transaction analysis
   , txAnalysis$ = tx$.filter(Boolean)
       .combineLatest(mempool$, feeEst$, (tx, mempool, feeEst) =>
-          ({ tx, mempool, feeEst, feerate: tx.fee ? tx.fee / tx.weight * 4 : null }))
-      .map(({ tx, feerate, mempool, feeEst }) => ({
+          ({ tx, mempool, feeEst, feerate: tx.fee ? tx.fee / tx.weight * 4 : null, discountfeerate: tx.fee && tx.discount_vsize ? tx.fee / tx.discount_vsize : null }))
+      .map(({ tx, feerate, discountfeerate, mempool, feeEst }) => ({
         feerate
+      , discountfeerate
       , privacyAnalysis: getPrivacyAnalysis(tx)
       , segwitGains: calcSegwitFeeGains(tx)
       , mempoolDepth: !tx.status.confirmed && feerate != null && mempool ? getMempoolDepth(mempool.fee_histogram, feerate) : null
